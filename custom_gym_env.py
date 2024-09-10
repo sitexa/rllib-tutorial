@@ -45,6 +45,9 @@ You should see results similar to the following in your console output:
 |          18.3034 | 28000 | 0.908918 |            12.9676 |
 +------------------+-------+----------+--------------------+
 """
+import json
+from pprint import pprint
+
 import gymnasium as gym
 from gymnasium.spaces import Discrete, Box
 import numpy as np
@@ -129,6 +132,10 @@ class SimpleCorridor(gym.Env):
 if __name__ == "__main__":
     args = parser.parse_args()
 
+    # 打印所有参数
+    print("运行参数:")
+    pprint(vars(args))
+
     # Can also register the env creator function explicitly with:
     # register_env("corridor-env", lambda config: SimpleCorridor())
 
@@ -150,6 +157,11 @@ if __name__ == "__main__":
             env_config={"corridor_length": args.corridor_length},
         )
     )
+    
+    # 打印算法配置
+    print("\n算法配置:")
+    pprint(base_config.to_dict())
+
 
     run_rllib_example_script_experiment(base_config, args)
 

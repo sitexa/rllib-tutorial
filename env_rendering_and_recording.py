@@ -70,21 +70,7 @@ from ray.rllib.utils.test_utils import (
 )
 from ray.tune.registry import get_trainable_cls, register_env
 from ray import tune
-import ray
 
-ray.init(
-    num_cpus=30,  # 预留2个CPU核心给系统使用
-    num_gpus=1,   # 如果没有GPU，设置为0
-    _memory=25 * 1024 * 1024 * 1024,  # 25GB for Ray workers
-    object_store_memory=5 * 1024 * 1024 * 1024,  # 5GB for Ray object store
-    _system_config={
-        "object_spilling_threshold": 0.8,
-        "object_store_full_delay_ms": 100,
-    },
-    ignore_reinit_error=True,
-    include_dashboard=True,
-    dashboard_port=8265
-)
 parser = add_rllib_example_script_args(default_reward=20.0)
 parser.set_defaults(env="ALE/Pong-v5")
 
@@ -244,7 +230,11 @@ if __name__ == "__main__":
 
     # Register our environment with tune.
     def _env_creator(cfg):
-        cfg.update({"render_mode": "rgb_array"})
+        cfg.update({
+            "render_mode": "rgb_array",
+            "num_gpus": 1,
+            "num-cpus": 30,
+        })
         if args.env.startswith("ALE/"):
             cfg.update(
                 {
@@ -356,4 +346,3 @@ python env_rendering_and_recording.py --enable-new-api-stack \
 --wandb-key=9c5b48cc3eb8716aa51b2eb3d0237b4cc5b962fa \
 --wandb-project=rllib-tuto --env='ALE/Pong-v5'
 """
-

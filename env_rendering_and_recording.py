@@ -230,11 +230,7 @@ if __name__ == "__main__":
 
     # Register our environment with tune.
     def _env_creator(cfg):
-        cfg.update({
-            "render_mode": "rgb_array",
-            "num-gpus": 1,
-            "num-cpus": 30,
-        })
+        cfg.update({"render_mode": "rgb_array"})
         if args.env.startswith("ALE/"):
             cfg.update(
                 {

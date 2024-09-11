@@ -70,6 +70,7 @@ from ray.rllib.utils.test_utils import (
 )
 from ray.tune.registry import get_trainable_cls, register_env
 from ray import tune
+import ray
 
 ray.init(
     num_cpus=30,  # 预留2个CPU核心给系统使用

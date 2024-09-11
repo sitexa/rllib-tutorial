@@ -232,7 +232,7 @@ if __name__ == "__main__":
     def _env_creator(cfg):
         cfg.update({
             "render_mode": "rgb_array",
-            "num_gpus": 1,
+            "num-gpus": 1,
             "num-cpus": 30,
         })
         if args.env.startswith("ALE/"):

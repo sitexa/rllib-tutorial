@@ -75,7 +75,7 @@ import ray
 ray.init(
     num_cpus=30,  # 预留2个CPU核心给系统使用
     num_gpus=1,   # 如果没有GPU，设置为0
-    memory=25 * 1024 * 1024 * 1024,  # 25GB for Ray workers
+    _memory=25 * 1024 * 1024 * 1024,  # 25GB for Ray workers
     object_store_memory=5 * 1024 * 1024 * 1024,  # 5GB for Ray object store
     _system_config={
         "object_spilling_threshold": 0.8,

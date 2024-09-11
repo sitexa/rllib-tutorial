@@ -71,6 +71,19 @@ from ray.rllib.utils.test_utils import (
 from ray.tune.registry import get_trainable_cls, register_env
 from ray import tune
 
+ray.init(
+    num_cpus=30,  # 预留2个CPU核心给系统使用
+    num_gpus=1,   # 如果没有GPU，设置为0
+    memory=25 * 1024 * 1024 * 1024,  # 25GB for Ray workers
+    object_store_memory=5 * 1024 * 1024 * 1024,  # 5GB for Ray object store
+    _system_config={
+        "object_spilling_threshold": 0.8,
+        "object_store_full_delay_ms": 100,
+    },
+    ignore_reinit_error=True,
+    include_dashboard=True,
+    dashboard_port=8265
+)
 parser = add_rllib_example_script_args(default_reward=20.0)
 parser.set_defaults(env="ALE/Pong-v5")
 
@@ -335,5 +348,11 @@ if __name__ == "__main__":
 4. 运行程序，并在 WandB 项目中查看生成的视频。
 
 如果您没有看到生成的视频文件，很可能是因为它们直接被发送到了 WandB，而不是保存在本地。您需要登录 WandB 账户来查看这些视频。
+"""
+
+"""
+python env_rendering_and_recording.py --enable-new-api-stack \
+--wandb-key=9c5b48cc3eb8716aa51b2eb3d0237b4cc5b962fa \
+--wandb-project=rllib-tuto --env='ALE/Pong-v5'
 """
 

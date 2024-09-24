@@ -1,0 +1,9 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+<!-- 旗帜背景 -->
+<rect width="600" height="400" fill="#EFEFEF"/>
+<!-- 青色岳麓山背景 -->
+<path d="M0,400 L100,250 L200,350 L300,200 L400,300 L500,150 L600,400 Z" fill="#00CED1" opacity="0.6"/>
+<!-- 文字 -->
+<text x="300" y="200" font-family="楷体, KaiTi, SimKai" font-size="72" fill="#FF0000" text-anchor="middle" font-weight="bold">2415</text>
+<text x="300" y="270" font-family="楷体, KaiTi, SimKai" font-size="36" fill="#FF0000" text-anchor="middle" font-weight="bold">闻鸡起舞</text>
+</svg>

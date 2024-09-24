@@ -1,0 +1,21 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+<!-- 背景圆 -->
+<circle cx="200" cy="200" r="190" fill="#F0F8FF" stroke="#1E3A8A" stroke-width="4"/>
+<!-- 岳麓山（三个峰） -->
+<path d="M50,200 L125,100 L200,180 L275,80 L350,200" fill="#228B22" />
+<!-- 湘江河 -->
+<path d="M50,250 Q125,230 200,250 T350,250" fill="none" stroke="#4682B4" stroke-width="20" />
+<!-- 中央元素：学生读书 -->
+<circle cx="200" cy="180" r="60" fill="#FFA500" />
+<rect x="170" y="160" width="60" height="40" fill="#FFFFFF" />
+<line x1="180" y1="170" x2="220" y2="170" stroke="#000000" stroke-width="2" />
+<line x1="180" y1="180" x2="220" y2="180" stroke="#000000" stroke-width="2" />
+<line x1="180" y1="190" x2="220" y2="190" stroke="#000000" stroke-width="2" />
+<!-- 学生 -->
+<circle cx="200" cy="220" r="15" fill="#FFFFFF" />
+<path d="M185,235 Q200,255 215,235" fill="none" stroke="#FFFFFF" stroke-width="3" />
+<!-- 文字 -->
+<text x="200" y="360" font-family="Arial, sans-serif" font-size="36" fill="#FFA500" font-weight="bold" text-anchor="middle">
+BC2415
+</text>
+</svg>

@@ -77,7 +77,7 @@ criterion = nn.MSELoss()
 optimizer = AdamW(model.parameters(), lr=0.001, weight_decay=0.01)
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10, verbose=True)
 
-num_epochs = 500
+num_epochs = 1500
 best_loss = float('inf')
 patience = 20
 no_improve = 0

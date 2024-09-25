@@ -168,3 +168,4 @@ cython_debug/
 /export_torch/
 .idea/
 /wandb_gifs/
+/lottery/best_model.pth

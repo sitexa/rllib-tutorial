@@ -20,4 +20,3 @@ for file in worst_*.gif; do
     mv -- "$file" "$new_name"
     worst_count=$((worst_count + 1))
 done
-

@@ -197,8 +197,13 @@ def continue_training_from_checkpoint(ckpt_dir: str, num_steps: int, new_model_d
         # 创建算法实例
         algo = algo_cls(config=new_config)
         
-        # 设置算法的策略
-        algo.set_weights(policy.get_weights())
+        # 设置算法的策略权重
+        policy_weights = policy.get_weights()
+        if "default_policy" in policy_weights:
+            algo.get_policy("default_policy").set_weights(policy_weights["default_policy"])
+        else:
+            logging.warning("无法找到 'default_policy' 的权重，跳过权重设置")
+
         
         # 继续训练
         for _ in range(num_steps):

@@ -76,16 +76,12 @@ def train_and_export_policy_and_model(algo_name: str, num_steps: int, model_dir:
 def restore_saved_model(export_dir: str) -> Union[torch.nn.Module, Dict[str, torch.Tensor]]:
     """
     从指定目录加载保存的PyTorch模型。
-
     Args:
         export_dir (str): 包含保存模型的目录路径。
-
     Returns:
         Union[torch.nn.Module, Dict[str, torch.Tensor]]: 加载的模型对象或状态字典。
-
     Raises:
         FileNotFoundError: 如果在指定路径找不到模型文件。
-
     """
     model_path = os.path.join(export_dir, "model.pt")
     if not os.path.exists(model_path):
@@ -120,13 +116,10 @@ def restore_saved_model(export_dir: str) -> Union[torch.nn.Module, Dict[str, tor
 def restore_policy_from_checkpoint(export_dir: str) -> None:
     """
     从检查点恢复策略并执行测试推理。
-
     Args:
         export_dir (str): 包含策略检查点的目录路径。
-
     Returns:
         None
-
     Raises:
         AssertionError: 如果结果不符合预期格式。
     """
@@ -157,7 +150,7 @@ def restore_policy_from_checkpoint(export_dir: str) -> None:
     logging.info(f"  Action distribution inputs shape is (2,): {results[2]['action_dist_inputs'].shape == (2,)}")
 
 
-def continue_training_from_checkpoint(ckpt_dir: str, num_steps: int, new_model_dir: str, new_ckpt_dir: str) -> None:
+def continue_training_from_checkpoint(algo_name: str, ckpt_dir: str, num_steps: int, new_model_dir: str, new_ckpt_dir: str) -> None:
     """
     从检查点恢复策略并继续训练。
 
@@ -173,47 +166,28 @@ def continue_training_from_checkpoint(ckpt_dir: str, num_steps: int, new_model_d
     try:
         # 从检查点恢复策略
         policy = Policy.from_checkpoint(ckpt_dir)
-        
+
         # 获取算法配置
         config = policy.config
         logging.info(f"恢复的策略配置: {config}")
-        
-        # 创建一个新的配置对象
-        algo_name = config.get("algo_class", "PPO") 
-        logging.info(f"使用的算法: {algo_name}")
-        
-        algo_cls = get_trainable_cls(algo_name)
-        new_config = algo_cls.get_default_config()
-        
-        # 更新新配置
-        for key, value in config.items():
-            if key != "framework" and hasattr(new_config, key):
-                setattr(new_config, key, value)
-                
-        # 设置框架和导出选项
-        new_config.framework("torch")
-        new_config.export_native_model_files = True
-        
+
         # 创建算法实例
-        algo = algo_cls(config=new_config)
-        
+        algo_cls = get_trainable_cls(algo_name)
+        algo = algo_cls(config=config)
+
         # 设置算法的策略权重
         policy_weights = policy.get_weights()
-        if "default_policy" in policy_weights:
-            algo.get_policy("default_policy").set_weights(policy_weights["default_policy"])
-        else:
-            logging.warning("无法找到 'default_policy' 的权重，跳过权重设置")
+        algo.set_weights(policy_weights)
 
-        
         # 继续训练
         for _ in range(num_steps):
             algo.train()
-        
+
         # 导出新的策略检查点
         algo.export_policy_checkpoint(new_ckpt_dir)
         # 导出新的PyTorch模型
         algo.export_policy_model(new_model_dir)
-        
+
         logging.info(f"==========继续训练完成。新模型和检查点已导出到 {new_model_dir} 和 {new_ckpt_dir}")
     except Exception as e:
         logging.error(f"==========继续训练过程中出错: {str(e)}")
@@ -225,38 +199,42 @@ def continue_training_from_checkpoint(ckpt_dir: str, num_steps: int, new_model_d
 if __name__ == "__main__":
     # 设置日志级别为INFO
     logging.basicConfig(level=logging.INFO)
-    
+
+    # 获取当前文件的目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
     # 创建命令行参数解析器
     parser = argparse.ArgumentParser(description="Train and export PPO model for CartPole")
     parser.add_argument("--num_steps", type=int, default=1, help="Number of training steps")
-    parser.add_argument("--model_dir", type=str, default=os.path.join(tempfile.gettempdir(), "model_export_dir"),
+    parser.add_argument("--model_dir", type=str, default=os.path.join(current_dir, "model_export_dir"),
                         help="Directory to export the model")
-    parser.add_argument("--ckpt_dir", type=str, default=os.path.join(tempfile.gettempdir(), "ckpt_export_dir"),
+    parser.add_argument("--ckpt_dir", type=str, default=os.path.join(current_dir, "ckpt_export_dir"),
                         help="Directory to export the checkpoint")
     parser.add_argument("--continue_training", action="store_true", help="是否从检查点继续训练")
     parser.add_argument("--continue_steps", type=int, default=1, help="继续训练的步数")
-    parser.add_argument("--new_model_dir", type=str, default=os.path.join(tempfile.gettempdir(), "new_model_export_dir"),
+    parser.add_argument("--new_model_dir", type=str, default=os.path.join(current_dir, "new_model_export_dir"),
                         help="新模型导出目录")
-    parser.add_argument("--new_ckpt_dir", type=str, default=os.path.join(tempfile.gettempdir(), "new_ckpt_export_dir"),
+    parser.add_argument("--new_ckpt_dir", type=str, default=os.path.join(current_dir, "new_ckpt_export_dir"),
                         help="新检查点导出目录")
-    
+    parser.add_argument("--algo_name", type=str, default="PPO", help="算法名称")
+
     args = parser.parse_args()
 
     # 初始化Ray
     with ray.init():
         # 训练并导出策略和模型
-        train_and_export_policy_and_model("PPO", args.num_steps, args.model_dir, args.ckpt_dir)
-        
+        train_and_export_policy_and_model(args.algo_name, args.num_steps, args.model_dir, args.ckpt_dir)
+
         # 恢复保存的模型
         restore_saved_model(args.model_dir)
-        
+
         # 从检查点恢复策略
         restore_policy_from_checkpoint(args.ckpt_dir)
 
         # 如果指定了继续训练，则从检查点继续训练
         if args.continue_training:
-            continue_training_from_checkpoint(args.ckpt_dir, args.continue_steps, args.new_model_dir, args.new_ckpt_dir)
-            
+            continue_training_from_checkpoint(args.algo_name, args.ckpt_dir, args.continue_steps, args.new_model_dir, args.new_ckpt_dir)
+
             # 验证新训练的模型和检查点
             restore_saved_model(args.new_model_dir)
             restore_policy_from_checkpoint(args.new_ckpt_dir)

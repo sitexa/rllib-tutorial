@@ -150,7 +150,7 @@ def restore_policy_from_checkpoint(export_dir: str) -> None:
     logging.info(f"  Action distribution inputs shape is (2,): {results[2]['action_dist_inputs'].shape == (2,)}")
 
 
-def continue_training_from_checkpoint(algo_name: str, ckpt_dir: str, num_steps: int, new_model_dir: str, new_ckpt_dir: str) -> None:
+def continue_training_from_checkpoint(algo_name: str, num_steps: int, model_dir: str, ckpt_dir: str) -> None:
     """
     从检查点恢复策略并继续训练。
 
@@ -184,11 +184,11 @@ def continue_training_from_checkpoint(algo_name: str, ckpt_dir: str, num_steps: 
             algo.train()
 
         # 导出新的策略检查点
-        algo.export_policy_checkpoint(new_ckpt_dir)
+        algo.export_policy_checkpoint(ckpt_dir)
         # 导出新的PyTorch模型
-        algo.export_policy_model(new_model_dir)
+        algo.export_policy_model(model_dir)
 
-        logging.info(f"==========继续训练完成。新模型和检查点已导出到 {new_model_dir} 和 {new_ckpt_dir}")
+        logging.info(f"==========继续训练完成。新模型和检查点已导出到 {model_dir} 和 {ckpt_dir}")
     except Exception as e:
         logging.error(f"==========继续训练过程中出错: {str(e)}")
         raise
@@ -212,10 +212,6 @@ if __name__ == "__main__":
                         help="Directory to export the checkpoint")
     parser.add_argument("--continue_training", action="store_true", help="是否从检查点继续训练")
     parser.add_argument("--continue_steps", type=int, default=1, help="继续训练的步数")
-    parser.add_argument("--new_model_dir", type=str, default=os.path.join(current_dir, "new_model_export_dir"),
-                        help="新模型导出目录")
-    parser.add_argument("--new_ckpt_dir", type=str, default=os.path.join(current_dir, "new_ckpt_export_dir"),
-                        help="新检查点导出目录")
     parser.add_argument("--algo_name", type=str, default="PPO", help="算法名称")
 
     args = parser.parse_args()
@@ -233,8 +229,8 @@ if __name__ == "__main__":
 
         # 如果指定了继续训练，则从检查点继续训练
         if args.continue_training:
-            continue_training_from_checkpoint(args.algo_name, args.ckpt_dir, args.continue_steps, args.new_model_dir, args.new_ckpt_dir)
+            continue_training_from_checkpoint(args.algo_name, args.continue_steps, args.model_dir, args.ckpt_dir)
 
             # 验证新训练的模型和检查点
-            restore_saved_model(args.new_model_dir)
-            restore_policy_from_checkpoint(args.new_ckpt_dir)
+            restore_saved_model(args.model_dir)
+            restore_policy_from_checkpoint(args.ckpt_dir)

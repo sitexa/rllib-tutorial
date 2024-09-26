@@ -176,17 +176,26 @@ def continue_training_from_checkpoint(ckpt_dir: str, num_steps: int, new_model_d
         
         # 获取算法配置
         config = policy.config
+        logging.info(f"恢复的策略配置: {config}")
+        
         # 创建一个新的配置对象
-        algo_cls = get_trainable_cls(config["algo_class"])
+        algo_name = config.get("algo_class", "PPO") 
+        logging.info(f"使用的算法: {algo_name}")
+        
+        algo_cls = get_trainable_cls(algo_name)
         new_config = algo_cls.get_default_config()
         
-        # 更新新配置对象的值
-        new_config.update(config)
-        config.framework("torch")
-        config.export_native_model_files = True
+        # 更新新配置
+        for key, value in config.items():
+            if key != "framework" and hasattr(new_config, key):
+                setattr(new_config, key, value)
+                
+        # 设置框架和导出选项
+        new_config.framework("torch")
+        new_config.export_native_model_files = True
         
         # 创建算法实例
-        algo = config.build()
+        algo = algo_cls(config=new_config)
         
         # 设置算法的策略
         algo.set_weights(policy.get_weights())
@@ -231,13 +240,13 @@ if __name__ == "__main__":
     # 初始化Ray
     with ray.init():
         # 训练并导出策略和模型
-        # train_and_export_policy_and_model("PPO", args.num_steps, args.model_dir, args.ckpt_dir)
+        train_and_export_policy_and_model("PPO", args.num_steps, args.model_dir, args.ckpt_dir)
         
         # 恢复保存的模型
-        # restore_saved_model(args.model_dir)
+        restore_saved_model(args.model_dir)
         
         # 从检查点恢复策略
-        # restore_policy_from_checkpoint(args.ckpt_dir)
+        restore_policy_from_checkpoint(args.ckpt_dir)
 
         # 如果指定了继续训练，则从检查点继续训练
         if args.continue_training:
